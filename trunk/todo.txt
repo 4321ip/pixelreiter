@@ -1,0 +1,5 @@
+- increase decrease grid size
+- zoom +/- (statt combobox)
+- wenn gridsize/zoom geändert wird in statusbar anzeigen
+- wenn fenster minimiert/ein anderes darüberliegt nichts grabben/updaten (ist womöglich eh schon eingebaut!)
+- aktuelles bild in zwischenablage kopieren
