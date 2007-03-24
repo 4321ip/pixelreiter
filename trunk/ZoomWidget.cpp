@@ -22,7 +22,7 @@ ZoomWidget::ZoomWidget(SelWin* sw, QWidget* parent) : QWidget(parent), selWin(sw
     hasCurrentLine = false;
     m_zoomFactor = 10;
     timer = new QTimer(this);
-    timer->setInterval(1000);
+    timer->setInterval(30);
     connect(timer, SIGNAL(timeout()), this, SLOT(grabPixmap()));
 }
 void ZoomWidget::closeEvent(QCloseEvent* /*event*/)
@@ -108,10 +108,13 @@ void ZoomWidget::doPainting(QPainter& painter)
     }
     
     //draw grid
-    if(m_showGrid)
+    if(m_gridColor.isValid())
     {
         pen.setStyle(Qt::SolidLine);
-        pen.setColor(QColor(255, 255, 255, 200));
+        
+        QColor gridPenColor(m_gridColor);
+        gridPenColor.setAlpha(200);
+        pen.setColor(gridPenColor);
         painter.setPen(pen); 
         static const int gridSize=10;
         for(int x=rulerWidth;x<width();x+=gridSize*m_zoomFactor) {

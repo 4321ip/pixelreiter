@@ -5,6 +5,7 @@
 #import <QHash>
 #import <QRgb>
 #import "ColorCount.h"
+#import "ui/ui_MainWindow.h"
 class ZoomWidget;
 class SelWin;
 class QAction;
@@ -18,7 +19,7 @@ class QModelIndex;
 class QTableView;
 class QListView;
 
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, private Ui::MainWindow
 {
     Q_OBJECT
 public:
@@ -30,8 +31,9 @@ protected:
     void closeEvent(QCloseEvent *event);
 private slots:
     void toggleGrab(bool);
-    void toggleShowGrid(bool);
-    void zoomChanged(int);
+    void toggleShowGrid(QAction* action);
+    void zoomIn();
+    void zoomOut();
     void intervalChanged(int);
     void colorClicked(const QModelIndex & index);
     void colorsTableChanged();
@@ -45,27 +47,11 @@ private:
     void readSettings();
     void writeSettings();
 
-    void createActions();
-    void createMenus();
-    void createToolBars();
-    void createStatusBar();
-    void createDockWindows();
+
     
     ZoomWidget* zoomWidget;
     SelWin* selWin;
 
-    QAction *grabAct;
-    QAction *quitAct;
-    QAction *showGridAct;
-    QAction *exportCurrentAct;
-    QAction *importScreenshotAct;
-    
-    QMenu *fileMenu;
-    QToolBar *fileToolBar;
-    QDockWidget *colorsDock;
-    QComboBox* zoomBox;
-
-    QTreeView* colorsTable;
     
     QComboBox* intervalBox;
 
