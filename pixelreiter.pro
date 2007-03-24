@@ -28,3 +28,5 @@ QT += core \
 gui
 INCLUDEPATH += .
 
+FORMS += MainWindow.ui
+

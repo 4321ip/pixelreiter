@@ -25,7 +25,7 @@ public:
     int zoomFactor() { return m_zoomFactor; }
     int updateInterval();
     QColor markColor() { return m_markColor; }
-    bool showGrid()  { return m_showGrid; }
+    QColor gridColor()  { return m_gridColor; }
     void doPainting(QPainter& painter);
 
 public slots:
@@ -33,7 +33,7 @@ public slots:
     void setZoomFactor(int factor);
     void setUpdateInterval(int i);
     void setMarkColor(QColor i) { m_markColor = i; update(); }
-    void setShowGrid(bool i) { m_showGrid = i; update(); }
+    void setGridColor(QColor i) { m_gridColor = i; update(); }
     void setPixmap(const QPixmap& pixmap) { m_pixmap = pixmap; update(); }
 
 signals:
@@ -46,7 +46,7 @@ private:
     int m_zoomFactor;
     static const int rulerWidth=20;
     QColor m_markColor;
-    bool m_showGrid;
+    QColor m_gridColor;
 
     bool hasCurrentLine;
     int currentLine;
