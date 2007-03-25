@@ -85,7 +85,8 @@ void ZoomWidget::doPainting(QPainter& painter)
 
     //paint the screenshot
     if(!m_pixmap.isNull()) {
-        QPixmap scaled = m_pixmap.scaled(m_pixmap.size()*m_zoomFactor);
+        QPixmap scaled = m_pixmap.copy(QRect(QPoint(0, 0), size() / m_zoomFactor));
+        scaled = scaled.scaled(scaled.size()*m_zoomFactor);
         painter.drawPixmap(rulerWidth, rulerWidth, scaled);
     }
 

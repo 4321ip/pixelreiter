@@ -91,7 +91,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent)
     
     statusBar()->showMessage(tr("Ready"));
     
-    emit grabAct->trigger();
+    grabAct->trigger();
 }
 void MainWindow::toggleGrab(bool i) {
     if(i)
@@ -251,5 +251,9 @@ void MainWindow::importScreenshot()
         QMessageBox::critical(this, tr("import screenshot"), tr("invalid file"));
         return;
     }
+    
+    grabAct->setChecked(false);
+    toggleGrab(false);
+
     zoomWidget->setPixmap(QPixmap::fromImage(image));
 }

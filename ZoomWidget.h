@@ -41,7 +41,6 @@ signals:
     void markColorChanged(const QColor& color);
 
 private:
-    void closeEvent(QCloseEvent* event);
     QPixmap m_pixmap;
     int m_zoomFactor;
     static const int rulerWidth=20;
@@ -62,6 +61,7 @@ protected:
     void mousePressEvent ( QMouseEvent * event );
     void mouseReleaseEvent ( QMouseEvent * event );
     void resizeEvent(QResizeEvent * event);
+    void closeEvent(QCloseEvent* event);
 };
 
 
