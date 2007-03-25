@@ -22,18 +22,6 @@
      <height>29</height>
     </rect>
    </property>
-   <widget class="QMenu" name="fileMenu" >
-    <property name="title" >
-     <string>&amp;File</string>
-    </property>
-    <addaction name="separator" />
-    <addaction name="grabAct" />
-    <addaction name="separator" />
-    <addaction name="importScreenshotAct" />
-    <addaction name="exportCurrentAct" />
-    <addaction name="separator" />
-    <addaction name="quitAct" />
-   </widget>
    <widget class="QMenu" name="settingsMenu" >
     <property name="title" >
      <string>&amp;Settings</string>
@@ -48,7 +36,26 @@
     </widget>
     <addaction name="menuGrid" />
    </widget>
+   <widget class="QMenu" name="editMenu" >
+    <property name="title" >
+     <string>&amp;Edit</string>
+    </property>
+    <addaction name="copyAct" />
+   </widget>
+   <widget class="QMenu" name="fileMenu" >
+    <property name="title" >
+     <string>&amp;File</string>
+    </property>
+    <addaction name="separator" />
+    <addaction name="grabAct" />
+    <addaction name="separator" />
+    <addaction name="importScreenshotAct" />
+    <addaction name="exportCurrentAct" />
+    <addaction name="separator" />
+    <addaction name="quitAct" />
+   </widget>
    <addaction name="fileMenu" />
+   <addaction name="editMenu" />
    <addaction name="settingsMenu" />
   </widget>
   <widget class="QStatusBar" name="statusbar" />
@@ -121,6 +128,19 @@
     </layout>
    </widget>
   </widget>
+  <widget class="QToolBar" name="toolsToolbar" >
+   <property name="windowTitle" >
+    <string>Tools</string>
+   </property>
+   <property name="orientation" >
+    <enum>Qt::Vertical</enum>
+   </property>
+   <attribute name="toolBarArea" >
+    <number>1</number>
+   </attribute>
+   <addaction name="actionColorPicker" />
+   <addaction name="actionDraw" />
+  </widget>
   <action name="grabAct" >
    <property name="checkable" >
     <bool>true</bool>
@@ -132,18 +152,21 @@
     <string>&amp;Grab</string>
    </property>
    <property name="statusTip" >
-    <string>update screenshot</string>
+    <string>Update Screenshot (Space)</string>
    </property>
    <property name="shortcut" >
     <string>Space</string>
    </property>
   </action>
   <action name="quitAct" >
+   <property name="icon" >
+    <iconset resource="icons.qrc" >:/tools/icons/exit.png</iconset>
+   </property>
    <property name="text" >
     <string>&amp;Quit</string>
    </property>
    <property name="statusTip" >
-    <string>quit Application</string>
+    <string>Quit Application (Ctrl+Q)</string>
    </property>
    <property name="shortcut" >
     <string>Ctrl+Q</string>
@@ -190,6 +213,9 @@
    </property>
   </action>
   <action name="actionZoomIn" >
+   <property name="icon" >
+    <iconset resource="icons.qrc" >:/tools/icons/viewmag+.png</iconset>
+   </property>
    <property name="text" >
     <string>+</string>
    </property>
@@ -201,6 +227,9 @@
    </property>
   </action>
   <action name="actionZoomOut" >
+   <property name="icon" >
+    <iconset resource="icons.qrc" >:/tools/icons/viewmag-.png</iconset>
+   </property>
    <property name="text" >
     <string>-</string>
    </property>
@@ -208,7 +237,45 @@
     <string>-</string>
    </property>
   </action>
+  <action name="copyAct" >
+   <property name="icon" >
+    <iconset resource="icons.qrc" >:/tools/icons/editcopy.png</iconset>
+   </property>
+   <property name="text" >
+    <string>&amp;Copy</string>
+   </property>
+   <property name="statusTip" >
+    <string>Copy to Clipboard (Ctrl+C)</string>
+   </property>
+   <property name="shortcut" >
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionColorPicker" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="icon" >
+    <iconset resource="icons.qrc" >:/tools/icons/tool_colorpicker.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Color Picker</string>
+   </property>
+  </action>
+  <action name="actionDraw" >
+   <property name="checkable" >
+    <bool>true</bool>
+   </property>
+   <property name="icon" >
+    <iconset resource="icons.qrc" >:/tools/icons/paintbrush.png</iconset>
+   </property>
+   <property name="text" >
+    <string>Draw</string>
+   </property>
+  </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="icons.qrc" />
+ </resources>
  <connections/>
 </ui>

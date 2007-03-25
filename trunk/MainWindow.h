@@ -40,9 +40,12 @@ private slots:
     void colorsTableChanged();
     void changeColor(const QColor& color);
     void copyColor();
+    void copyImage();
     
     void exportCurrent();
     void importScreenshot();
+    
+    void toolSelected(QAction* tool);
 
 private:
     void readSettings();

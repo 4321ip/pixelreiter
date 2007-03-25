@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent)
     QAction* colorDockAction = colorsDock->toggleViewAction();
     colorDockAction->setText(tr("show &colors"));
     settingsMenu->addAction(colorDockAction);
+    colorsDock->hide();
     
      QActionGroup* gridGroup = new QActionGroup(this);
      gridGroup->addAction(actionGridNone);
@@ -49,6 +50,12 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent)
      connect(actionZoomIn, SIGNAL(triggered()), this, SLOT(zoomIn()));
      connect(actionZoomOut, SIGNAL(triggered()), this, SLOT(zoomOut()));
 
+     QActionGroup* toolsGroup = new QActionGroup(this);
+     toolsGroup->addAction(actionColorPicker);
+     toolsGroup->addAction(actionDraw);
+     connect(toolsGroup, SIGNAL(triggered(QAction*)), this, SLOT(toolSelected(QAction*)));
+
+     
 //      intervalBox = new QComboBox;
 //      intervalBox->insertItem(0, "30ms", 30);
 //      intervalBox->insertItem(1, "100ms", 100);
@@ -85,6 +92,7 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent)
     connect(zoomWidget, SIGNAL(markColorChanged( const QColor& )), this, SLOT(changeColor( const QColor& )));
 
     connect(copyColorButton, SIGNAL(clicked()), this, SLOT(copyColor()));
+    connect(copyAct, SIGNAL(triggered()), this, SLOT(copyImage()));
     
     colorsDock->hide();
     readSettings();
@@ -132,11 +140,12 @@ void MainWindow::intervalChanged(int i) {
 }
 
 void MainWindow::colorClicked(const QModelIndex & index) {
-    if(index.isValid()) 
+    if(index.isValid()) {
         zoomWidget->setMarkColor(m_colorCountModel->color(index.row()));
+    }
 }
 void MainWindow::colorsTableChanged() {
-     colorClicked(colorsTable->selectionModel()->currentIndex());
+    colorClicked(colorsTable->selectionModel()->currentIndex());
 }
 void MainWindow::changeColor( const QColor & color) {
      QModelIndex index = m_colorCountModel->index(color.rgb());
@@ -149,6 +158,14 @@ void MainWindow::copyColor()
      QClipboard *clipboard = QApplication::clipboard();
      QColor c(m_colorCountModel->color(colorsTable->selectionModel()->currentIndex().row()));
      clipboard->setText(c.name());
+}
+void MainWindow::copyImage() 
+{
+    QClipboard *clipboard = QApplication::clipboard();
+    QImage image(zoomWidget->size(), QImage::Format_RGB32);
+    QPainter painter(&image);
+    zoomWidget->doPainting(painter);
+    clipboard->setImage(image);
 }
 void MainWindow::readSettings()
 {
@@ -257,3 +274,16 @@ void MainWindow::importScreenshot()
 
     zoomWidget->setPixmap(QPixmap::fromImage(image));
 }
+
+void MainWindow::toolSelected(QAction* tool)
+{
+    if (tool == actionDraw) {
+        zoomWidget->setCurrentTool(ToolDraw);
+    } else if (tool == actionColorPicker) {
+        zoomWidget->setCurrentTool(ToolColorPicker);
+    } else {
+        zoomWidget->setCurrentTool(ToolNone);
+        qWarning() << "unknown tool!";
+    }
+}
+
