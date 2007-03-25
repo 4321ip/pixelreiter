@@ -29,6 +29,7 @@ public slots:
 
 protected:
     void closeEvent(QCloseEvent *event);
+    void keyPressEvent ( QKeyEvent * event );
 private slots:
     void toggleGrab(bool);
     void toggleShowGrid(QAction* action);
