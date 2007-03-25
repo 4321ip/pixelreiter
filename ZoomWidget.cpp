@@ -20,10 +20,13 @@ ZoomWidget::ZoomWidget(SelWin* sw, QWidget* parent) : QWidget(parent), selWin(sw
 
     setMouseTracking(true);
     hasCurrentLine = false;
+    m_isDrawing = false;
     m_zoomFactor = 10;
+    
     timer = new QTimer(this);
-    timer->setInterval(30);
+    timer->setInterval(1000);
     connect(timer, SIGNAL(timeout()), this, SLOT(grabPixmap()));
+    
 }
 void ZoomWidget::closeEvent(QCloseEvent* /*event*/)
 {
@@ -82,7 +85,6 @@ void ZoomWidget::paintEvent(QPaintEvent * /*event*/) {
 
 void ZoomWidget::doPainting(QPainter& painter)
 {
-
     //paint the screenshot
     if(!m_pixmap.isNull()) {
         QPixmap scaled = m_pixmap.copy(QRect(QPoint(0, 0), size() / m_zoomFactor));
@@ -93,8 +95,9 @@ void ZoomWidget::doPainting(QPainter& painter)
     //mark active pixels
     QPen pen;
     pen.setStyle(Qt::SolidLine);
-    pen.setColor(QColor(255, 0, 0));
+    pen.setColor(QColor(255, 0, 0, 100));
     painter.setPen(pen);
+    QBrush brush(QColor(255, 0, 0, 100));
 
     if(m_markColor.isValid())
     {
@@ -102,7 +105,8 @@ void ZoomWidget::doPainting(QPainter& painter)
         for(int x=0;x<m_pixmap.size().width();x++) {
             for(int y=0;y<m_pixmap.size().height();y++) {
                 if(image.pixel(x, y)==m_markColor.rgb()) {
-                    painter.drawRect(rulerWidth+x*m_zoomFactor, rulerWidth+y*m_zoomFactor, m_zoomFactor, m_zoomFactor);
+                    //painter.drawRect(rulerWidth+x*m_zoomFactor, rulerWidth+y*m_zoomFactor, m_zoomFactor, m_zoomFactor);
+                    painter.fillRect(QRect(rulerWidth+x*m_zoomFactor, rulerWidth+y*m_zoomFactor, m_zoomFactor, m_zoomFactor), brush);
                 }
             }
         }
@@ -258,6 +262,9 @@ void ZoomWidget::doPainting(QPainter& painter)
         if(!arrowOnOutside) //else qSwaped allready
             last = y;
     }
+    
+    painter.drawImage(QPoint(0, 0), m_drawingImage);
+
 }
 void ZoomWidget::updateCursor( QMouseEvent * event ) {
     if(hasCurrentLine) {
@@ -290,35 +297,38 @@ void ZoomWidget::updateCursor( QMouseEvent * event ) {
 }
 
 void ZoomWidget::mouseMoveEvent ( QMouseEvent * event ) {
-    if(hasCurrentLine)
-    {
-        Line* line = lines.at(currentLine);
-        if(line->orientation == Qt::Vertical) {
-            int y = event->pos().y();
-            if(y >= height()) y = height();
-            y = y - rulerWidth;
-            y = y / m_zoomFactor;
-            if(y < 0) y = 0;
-            line->position = y;
-        } else if (line->orientation == Qt::Horizontal) {
-            int x = event->pos().x();
-            if(x >= width()) x = width();
-            x = x - rulerWidth;
-            x = x / m_zoomFactor;
-            if(x < 0) x = 0;
-            line->position = x;
+    if ((event->buttons() & Qt::LeftButton) && m_isDrawing) {
+        drawLineTo(event->pos());
+    } else {
+        if (hasCurrentLine) {
+            Line* line = lines.at(currentLine);
+            if(line->orientation == Qt::Vertical) {
+                int y = event->pos().y();
+                if(y >= height()) y = height();
+                y = y - rulerWidth;
+                y = y / m_zoomFactor;
+                if(y < 0) y = 0;
+                line->position = y;
+            } else if (line->orientation == Qt::Horizontal) {
+                int x = event->pos().x();
+                if(x >= width()) x = width();
+                x = x - rulerWidth;
+                x = x / m_zoomFactor;
+                if(x < 0) x = 0;
+                line->position = x;
+            }
+            update();
         }
-        update();
+        updateCursor(event);
     }
-    updateCursor(event);
 }
 
 void ZoomWidget::mousePressEvent ( QMouseEvent * event )
 {
-    if(event->button() == Qt::LeftButton)
+    if (event->button() & Qt::LeftButton)
     {
-        
         if(event->pos().x() < rulerWidth && event->pos().y() > rulerWidth) {
+            //on ruler, new line
             Line* line = new Line;
             line->position = 0;
             line->orientation = Qt::Horizontal;
@@ -327,7 +337,9 @@ void ZoomWidget::mousePressEvent ( QMouseEvent * event )
             hasCurrentLine = true;
             updateCursor(event);
             update();
+            return;
         } else if (event->pos().x() > rulerWidth && event->pos().y() < rulerWidth) {
+            //on ruler, new line
             Line* line = new Line;
             line->position = 0;
             line->orientation = Qt::Vertical;
@@ -336,6 +348,7 @@ void ZoomWidget::mousePressEvent ( QMouseEvent * event )
             hasCurrentLine = true;
             updateCursor(event);
             update();
+            return;
         } else {
             for(int i=0;i<lines.count();i++)
             {
@@ -347,7 +360,7 @@ void ZoomWidget::mousePressEvent ( QMouseEvent * event )
                         hasCurrentLine = true;
                         updateCursor(event);
                         update();
-                        break;
+                        return;
                     }
                 } else if (line->orientation == Qt::Vertical) {
                     int lineY = line->position * m_zoomFactor + rulerWidth;
@@ -356,18 +369,25 @@ void ZoomWidget::mousePressEvent ( QMouseEvent * event )
                         hasCurrentLine = true;
                         updateCursor(event);
                         update();
-                        break;
+                        return;
                     }
                 }
             }
+        }
+        if (m_currentTool == ToolDraw) {
+            //color picker if no line klicked
+            m_isDrawing = true;
+            m_drawingLastPoint = event->pos();
         }
     }
 }
 
 void ZoomWidget::mouseReleaseEvent ( QMouseEvent * event )
 {
-    if(hasCurrentLine && event->button() == Qt::LeftButton)
-    {
+    if ((event->button() & Qt::LeftButton) && m_isDrawing) {
+        drawLineTo(event->pos());
+        m_isDrawing = false;
+    } else if (hasCurrentLine && (event->button() & Qt::LeftButton)) {
         Line* line = lines.at(currentLine);
         if(line->position==0) {
             //if line is at position 0 delete it again
@@ -377,9 +397,7 @@ void ZoomWidget::mouseReleaseEvent ( QMouseEvent * event )
         hasCurrentLine = false;
         unsetCursor();
         update();
-    }
-    else if(event->button() == Qt::LeftButton)
-    {
+    } else if (m_currentTool == ToolColorPicker && (event->button() & Qt::LeftButton)) {
         if(event->pos().x() > rulerWidth && event->pos().y() > rulerWidth) 
         {
             if(event->pos().x() > m_pixmap.size().width() || event->pos().y() > m_pixmap.size().height() ) {
@@ -394,10 +412,19 @@ void ZoomWidget::mouseReleaseEvent ( QMouseEvent * event )
     }
 }
 
-void ZoomWidget::resizeEvent(QResizeEvent * event) {
+void ZoomWidget::resizeEvent(QResizeEvent * event)
+{
+    if (width() > m_drawingImage.width() || height() > m_drawingImage.height()) {
+        int newWidth = qMax(width() + 128, m_drawingImage.width());
+        int newHeight = qMax(height() + 128, m_drawingImage.height());
+        resizeImage(m_drawingImage, QSize(newWidth, newHeight));
+    }
+
     selWin->setSelectionSize(event->size()/m_zoomFactor);
 	grabPixmap();
 	update();
+
+    QWidget::resizeEvent(event);
 }
 
 void ZoomWidget::setZoomFactor(int factor)
@@ -411,4 +438,34 @@ void ZoomWidget::setUpdateInterval(int i) {
 }
 int ZoomWidget::updateInterval() {
     return timer->interval();
+}
+
+void ZoomWidget::drawLineTo(const QPoint &endPoint)
+{
+    int myPenWidth = 10;
+    QColor myPenColor(255, 0, 0);
+    QPainter painter(&m_drawingImage);
+    painter.setPen(QPen(myPenColor, myPenWidth, Qt::SolidLine, Qt::RoundCap,
+                   Qt::RoundJoin));
+    painter.drawLine(m_drawingLastPoint, endPoint);
+//todo: implement modified(?)
+//     modified = true;
+
+//todo: optimize
+//     int rad = (myPenWidth / 2) + 2;
+//     update(QRect(m_drawingLastPoint, endPoint).normalized()
+//             .adjusted(-rad, -rad, +rad, +rad));
+    update();
+    m_drawingLastPoint = endPoint;
+}
+
+void ZoomWidget::resizeImage(QImage &image, const QSize &newSize)
+{
+    if (image.size() == newSize)
+        return;
+
+    QImage newImage(newSize, QImage::Format_ARGB32);
+    QPainter painter(&newImage);
+    painter.drawImage(QPoint(0, 0), image);
+    image = newImage;
 }

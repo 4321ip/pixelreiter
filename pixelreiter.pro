@@ -30,3 +30,5 @@ INCLUDEPATH += .
 
 FORMS += MainWindow.ui
 
+RESOURCES += icons.qrc
+

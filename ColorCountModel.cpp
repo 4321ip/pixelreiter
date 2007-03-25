@@ -96,6 +96,7 @@ QVariant ColorCountModel::data(const QModelIndex &index, int role) const
 }
 QColor ColorCountModel::color(int row) const
 {
+    if(row >= m_colors.count()) return QColor();
     return m_colors.at(row).color;
 }
 QVariant ColorCountModel::headerData(int section, Qt::Orientation orientation,

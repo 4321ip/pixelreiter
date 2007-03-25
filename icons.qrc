@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/tools" >
+        <file>icons/editcopy.png</file>
+        <file>icons/exit.png</file>
+        <file>icons/paintbrush.png</file>
+        <file>icons/tool_colorpicker.png</file>
+        <file>icons/viewmag+.png</file>
+        <file>icons/viewmag-.png</file>
+    </qresource>
+</RCC>

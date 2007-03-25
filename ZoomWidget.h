@@ -13,6 +13,7 @@ struct Line {
     int position;
     QFlags<Qt::Orientation> orientation;
 };
+enum Tool { ToolNone, ToolDraw, ToolColorPicker };
 
 class ZoomWidget : public QWidget
 {
@@ -26,15 +27,21 @@ public:
     int updateInterval();
     QColor markColor() { return m_markColor; }
     QColor gridColor()  { return m_gridColor; }
+    Tool currentTool() { return m_currentTool; }
+
     void doPainting(QPainter& painter);
 
 public slots:
     void grabPixmap();
     void setZoomFactor(int factor);
     void setUpdateInterval(int i);
-    void setMarkColor(QColor i) { m_markColor = i; update(); }
+    void setMarkColor(QColor i) {
+        m_markColor = i;
+        update();
+    }
     void setGridColor(QColor i) { m_gridColor = i; update(); }
     void setPixmap(const QPixmap& pixmap) { m_pixmap = pixmap; update(); }
+    void setCurrentTool(Tool tool) { m_currentTool = tool; }
 
 signals:
     void colorsChanged(const QList<ColorCount>& colors);
@@ -52,9 +59,15 @@ private:
     QList<Line*> lines;
     
     void updateCursor( QMouseEvent * event );
+    void drawLineTo(const QPoint &endPoint);
+    void resizeImage(QImage &image, const QSize &newSize);
     SelWin* selWin;
     QTimer* timer;
-    
+    Tool m_currentTool;
+    bool m_isDrawing;
+    QPoint m_drawingLastPoint;
+    QImage m_drawingImage;
+
 protected:
     void paintEvent(QPaintEvent * event);
     void mouseMoveEvent ( QMouseEvent * event );
