@@ -24,6 +24,8 @@
 #include <QFileDialog>
 #include <QPainter>
 #include <QMessageBox>
+#include <QKeyEvent>
+#include <QDesktopWidget>
 
 MainWindow::MainWindow(QWidget* parent): QMainWindow(parent)
 {
@@ -84,9 +86,12 @@ MainWindow::MainWindow(QWidget* parent): QMainWindow(parent)
 
     connect(copyColorButton, SIGNAL(clicked()), this, SLOT(copyColor()));
     
+    colorsDock->hide();
     readSettings();
     
     statusBar()->showMessage(tr("Ready"));
+    
+    emit grabAct->trigger();
 }
 void MainWindow::toggleGrab(bool i) {
     if(i)
@@ -190,6 +195,36 @@ void MainWindow::closeEvent(QCloseEvent */*event*/)
     delete selWin;
 }
 
+void MainWindow::keyPressEvent ( QKeyEvent * event )
+{
+    int moveWidth = 1;
+    if (event->modifiers() && Qt::ShiftModifier) {
+        moveWidth = 5;
+    }
+    if (event->key() == Qt::Key_Left) {
+        QPoint pos = selWin->pos();
+        pos.setX(pos.x()-moveWidth);
+        if (pos.x() < 0) pos.setX(0);
+        selWin->move(pos);
+    } else if (event->key() == Qt::Key_Up) {
+        QPoint pos = selWin->pos();
+        pos.setY(pos.y()-moveWidth);
+        if (pos.y() < 0) pos.setY(0);
+        selWin->move(pos);
+    } else if (event->key() == Qt::Key_Right) {
+        QPoint pos = selWin->pos();
+        pos.setX(pos.x()+moveWidth);
+        int maxX = QApplication::desktop()->screenGeometry(selWin).width() - selWin->size().width();
+        if (pos.x() > maxX) pos.setX(maxX);
+        selWin->move(pos);
+    } else if (event->key() == Qt::Key_Down) {
+        QPoint pos = selWin->pos();
+        pos.setY(pos.y()+moveWidth);
+        int maxY = QApplication::desktop()->screenGeometry(selWin).height() - selWin->size().height();
+        if (pos.y() > maxY) pos.setY(maxY);
+        selWin->move(pos);
+    }
+}
 
 void MainWindow::exportCurrent()
 {
