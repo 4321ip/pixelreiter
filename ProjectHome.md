@@ -1,0 +1,1 @@
+A little tool to check for pixel errors in for example in webdesigns.
